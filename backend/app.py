@@ -4,96 +4,39 @@ from werkzeug.utils import secure_filename
 import os
 import pymupdf
 from docx import Document
+
 from algorithms.inverted_index import build_inverted_index
-from algorithms.boolean_retrieval import boolean_search
 from algorithms.ranking import rank_documents
 from algorithms.phrase_search import phrase_search
-
 from algorithms.tolerant_retrieval import (
     wildcard_search,
     spelling_correction
 )
-
 from algorithms.query_expansion import expand_query
-
-from algorithms.evaluation import calculate_metrics
-
-metrics = calculate_metrics(
-    relevant_documents=[1, 2, 3],
-    retrieved_documents=[1, 2, 4]
-)
-
-print(metrics)
-
-
-
 
 
 app = Flask(__name__)
 app.secret_key = "mini-search-engine-secret"
 
-# Folder where uploaded documents will be stored
-UPLOAD_FOLDER = "uploads"
+# Use absolute paths so the application works on Render too
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+SAMPLE_FOLDER = os.path.join(BASE_DIR, "sample_documents")
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(SAMPLE_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
 
-# Temporary document collection
+# Document collection and inverted index
 documents = []
-
-# Store inverted index
 index = {}
 
 
-
-def load_saved_documents():
-    global index
-
-    documents.clear()
-
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
-    for filename in sorted(os.listdir(app.config["UPLOAD_FOLDER"])):
-
-        if not allowed_file(filename):
-            continue
-
-        file_path = os.path.join(
-            app.config["UPLOAD_FOLDER"], filename
-        )
-
-        if not os.path.isfile(file_path):
-            continue
-
-        extension = filename.rsplit(".", 1)[1].lower()
-
-        try:
-            if extension == "pdf":
-                text = extract_pdf(file_path)
-            elif extension == "docx":
-                text = extract_docx(file_path)
-            else:
-                text = extract_txt(file_path)
-
-            documents.append({
-                "id": len(documents) + 1,
-                "name": filename,
-                "text": text
-            })
-
-        except Exception as error:
-            print(f"Error loading {filename}: {error}")
-
-    index = build_inverted_index(documents)
-
-    print(f"Loaded {len(documents)} documents successfully!")
-    print(f"Indexed {len(index)} unique terms!")
-
-
-
-# Check whether the file format is supported
+# Check supported file formats
 def allowed_file(filename):
     return (
         "." in filename
@@ -105,31 +48,87 @@ def allowed_file(filename):
 def extract_pdf(file_path):
     text = ""
 
-    pdf = pymupdf.open(file_path)
+    with pymupdf.open(file_path) as pdf:
+        for page in pdf:
+            text += page.get_text() + "\n"
 
-    for page in pdf:
-        text += page.get_text() + "\n"
-
-    pdf.close()
     return text
 
 
 # Extract text from DOCX
 def extract_docx(file_path):
     document = Document(file_path)
-
-    text = []
-
-    for paragraph in document.paragraphs:
-        text.append(paragraph.text)
-
-    return "\n".join(text)
+    return "\n".join(
+        paragraph.text for paragraph in document.paragraphs
+    )
 
 
 # Extract text from TXT
 def extract_txt(file_path):
     with open(file_path, "r", encoding="utf-8", errors="replace") as file:
         return file.read()
+
+
+# Load permanent sample documents and visitor uploads
+def load_saved_documents():
+    global index
+
+    documents.clear()
+
+    # Load sample documents first, then user uploads
+    folders = [SAMPLE_FOLDER, UPLOAD_FOLDER]
+
+    loaded_paths = set()
+
+    for folder in folders:
+        os.makedirs(folder, exist_ok=True)
+
+        for filename in sorted(os.listdir(folder)):
+
+            if not allowed_file(filename):
+                continue
+
+            file_path = os.path.join(folder, filename)
+
+            if not os.path.isfile(file_path):
+                continue
+
+            # Prevent loading the same physical file twice
+            real_path = os.path.realpath(file_path)
+
+            if real_path in loaded_paths:
+                continue
+
+            loaded_paths.add(real_path)
+
+            extension = filename.rsplit(".", 1)[1].lower()
+
+            try:
+                if extension == "pdf":
+                    text = extract_pdf(file_path)
+
+                elif extension == "docx":
+                    text = extract_docx(file_path)
+
+                else:
+                    text = extract_txt(file_path)
+
+                documents.append({
+                    "id": len(documents) + 1,
+                    "name": filename,
+                    "text": text
+                })
+
+                print(f"Loaded: {filename}")
+
+            except Exception as error:
+                print(f"Error loading {filename}: {error}")
+
+    # Build one index containing all loaded documents
+    index = build_inverted_index(documents)
+
+    print(f"Loaded {len(documents)} documents successfully!")
+    print(f"Indexed {len(index)} unique terms!")
 
 
 # Home page
@@ -144,8 +143,7 @@ def home():
     )
 
 
-# search route
-
+# Search route
 @app.route("/search", methods=["GET"])
 def search():
 
@@ -155,23 +153,32 @@ def search():
     search_type = "Search"
     suggestions = []
 
+    if not query:
+        return redirect(url_for("home"))
+
+    # Phrase search
     if query.startswith('"') and query.endswith('"'):
 
         results = phrase_search(
             query[1:-1], index, documents
         )
+
         search_type = "Phrase Search"
 
+    # Wildcard search
     elif "*" in query:
 
         results = wildcard_search(
             query, index, documents
         )
+
         search_type = "Wildcard Search"
 
+    # Ranked search
     else:
 
         results = rank_documents(query, documents)
+
         search_type = "Ranked Search"
 
         if not results and len(query.split()) == 1:
@@ -188,31 +195,32 @@ def search():
     )
 
 
-    # expand route
-    @app.route("/expand")
-    def expand():
+# Query expansion route
+@app.route("/expand", methods=["GET"])
+def expand():
 
-        query = request.args.get("query", "")
+    query = request.args.get("query", "").strip()
 
-        expanded = expand_query(query)
+    expanded = expand_query(query)
 
-        return render_template(
-            "index.html",
-            documents=documents,
-            index=index,
-            results=[],
-            query=query,
-            expanded=expanded,
-            search_type="Query Expansion"
-        )
+    expanded_query = " ".join(expanded)
+
+    results = rank_documents(expanded_query, documents)
+
+    return render_template(
+        "index.html",
+        documents=documents,
+        index=index,
+        results=results,
+        query=query,
+        expanded=expanded,
+        search_type="Query Expansion"
+    )
 
 
-
-
-# Upload document
+# Upload document route
 @app.route("/upload", methods=["POST"])
 def upload():
-    global index
 
     if "file" not in request.files:
         flash("No file selected.")
@@ -229,32 +237,20 @@ def upload():
         return redirect(url_for("home"))
 
     filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-    file.save(file_path)
+    if not filename:
+        flash("Invalid filename.")
+        return redirect(url_for("home"))
 
-    extension = filename.rsplit(".", 1)[1].lower()
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
 
     try:
-        if extension == "pdf":
-            extracted_text = extract_pdf(file_path)
+        file.save(file_path)
 
-        elif extension == "docx":
-            extracted_text = extract_docx(file_path)
+        # Reload sample documents and all uploaded documents
+        load_saved_documents()
 
-        else:
-            extracted_text = extract_txt(file_path)
-
-        documents.append({
-            "id": len(documents) + 1,
-            "name": filename,
-            "text": extracted_text
-        })
-
-        # Rebuild inverted index after every upload
-        index = build_inverted_index(documents)
-
-        flash(f"{filename} uploaded and processed successfully!")
+        flash(f"{filename} uploaded and indexed successfully!")
 
     except Exception as error:
         flash(f"Could not process document: {error}")
@@ -262,31 +258,10 @@ def upload():
     return redirect(url_for("home"))
 
 
-
-@app.route("/expand", methods=["GET"])
-def expand():
-
-    query = request.args.get("query", "").strip()
-
-    expanded = expand_query(query)
-
-    # Search using all expanded terms
-    expanded_query = " ".join(expanded)
-
-    results = rank_documents(expanded_query, documents)
-
-    return render_template(
-        "index.html",
-        documents=documents,
-        index=index,
-        results=results,
-        query=query,
-        expanded=expanded,
-        search_type="Query Expansion"
-    )
-
+# Load documents when the application starts.
+# This also runs when Gunicorn imports the app on Render.
 load_saved_documents()
 
+
 if __name__ == "__main__":
-    load_saved_documents()
     app.run(debug=True)
