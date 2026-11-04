@@ -36,6 +36,8 @@ app.secret_key = "mini-search-engine-secret"
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 ALLOWED_EXTENSIONS = {"pdf", "docx", "txt"}
 
 # Temporary document collection
@@ -283,7 +285,7 @@ def expand():
         search_type="Query Expansion"
     )
 
-
+load_saved_documents()
 
 if __name__ == "__main__":
     load_saved_documents()
