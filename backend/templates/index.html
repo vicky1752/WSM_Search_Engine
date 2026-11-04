@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VKY Search Engine</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 40px;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px #00000012;
+        }
+
+        h1 {
+            color: #243b80;
+        }
+
+        .upload-box, .search-box {
+            background: #f0f3ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            width: 65%;
+            max-width: 500px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #243b80;
+            color: white;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16275c;
+        }
+
+        .message {
+            background: #e7f7e9;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .document {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .preview {
+            color: #666;
+            font-size: 14px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #243b80;
+            color: white;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .result-box {
+            background: #f8f9fc;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 4px solid #243b80;
+        }
+
+        .muted {
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>VKY Search Engine</h1>
+
+    <h2>Web Search Mining Project</h2>
+
+    <p>
+        Upload documents and search their content
+        using Information Retrieval techniques.
+    </p>
+
+    <!-- DOCUMENT UPLOAD -->
+
+    <div class="upload-box">
+
+        <h3>Upload Documents</h3>
+
+        <form action="/upload" method="POST"
+              enctype="multipart/form-data">
+
+            <input type="file" name="file"
+                   accept=".pdf,.docx,.txt" required>
+
+            <br><br>
+
+            <button type="submit">Upload Document</button>
+
+        </form>
+
+        <p>Supported formats: PDF, DOCX, TXT</p>
+
+    </div>
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+
+    <!-- SEARCH DOCUMENTS -->
+
+    <div class="search-box">
+
+        <h2>Search Documents</h2>
+
+        <p>
+            Search using ranked retrieval, Boolean operators
+            or exact phrase matching.
+        </p>
+
+        <form action="/search" method="GET">
+
+            <input
+                type="text"
+                name="query"
+                placeholder='bhungi OR "eleven stories"'
+                value="{{ query|default('') }}"
+                required
+            >
+
+            <button type="submit">Search</button>
+
+        </form>
+
+        <p class="muted">
+            Ranked: premchand |
+            Phrase: "eleven stories" |
+            Boolean: information AND retrieval
+        </p>
+
+    </div>
+
+   <!-- search expand -->
+
+    <hr>
+
+    <h3>Query Expansion Demonstration</h3>
+
+    <form action="/expand" method="GET">
+        <input type="text" name="query"
+            placeholder="Enter a query" required>
+        <button type="submit">Expand Query</button>
+    </form>
+
+    {% if expanded %}
+        <p><strong>Expanded terms:</strong></p>
+        <p>{{ expanded|join(", ") }}</p>
+    {% endif %}
+
+
+    
+    <!-- SEARCH RESULTS -->
+
+    {% if query %}
+
+        <h2>{{ search_type|default('Search') }} Results</h2>
+
+        <p>Search query: <strong>{{ query }}</strong></p>
+
+        {% if results %}
+
+            <p>Documents found: {{ results|length }}</p>
+
+            {% for doc in results %}
+
+                <div class="result-box">
+
+                    <strong>{{ doc.name }}</strong>
+
+                    {% if doc.score is defined %}
+
+                        <p>
+                            Relevance Score:
+                            <strong>
+                                {{ "%.4f"|format(doc.score) }}
+                            </strong>
+                        </p>
+
+                    {% endif %}
+
+                    <p class="preview">
+                        {{ doc.text[:300] }}...
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No matching documents found.</p>
+
+            {% if suggestions %}
+                <p>Did you mean:</p>
+
+                {% for suggestion in suggestions %}
+                    <a href="/search?query={{ suggestion }}">
+                        {{ suggestion }}
+                    </a>
+                {% endfor %}
+            {% endif %}
+
+        {% endif %}
+
+    {% endif %}
+
+
+
+
+    <!-- UPLOADED DOCUMENTS -->
+
+    <hr>
+
+    <h2>Uploaded Documents ({{ documents|length }})</h2>
+
+    {% for doc in documents %}
+
+        <div class="document">
+
+            <strong>{{ doc.name }}</strong>
+
+            <p class="preview">
+                {{ doc.text[:250] }}...
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <p>No documents uploaded yet.</p>
+
+    {% endfor %}
+
+
+    <!-- INVERTED INDEX -->
+
+    <hr>
+
+    <h2>Inverted Index Explorer</h2>
+
+    <p>
+        Dictionary terms and their corresponding positional postings.
+    </p>
+
+    <table width="100%">
+
+        <tr>
+            <th>Term</th>
+            <th>Document ID</th>
+            <th>Positions</th>
+        </tr>
+
+        {% for term, postings in index.items() %}
+
+            {% for doc_id, positions in postings.items() %}
+
+                <tr>
+                    <td>{{ term }}</td>
+                    <td>D{{ doc_id }}</td>
+                    <td>{{ positions }}</td>
+                </tr>
+
+            {% endfor %}
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+</body>
+</html>

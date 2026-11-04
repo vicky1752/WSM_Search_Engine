@@ -1,0 +1,17 @@
+# Python virtual environment
+backend/venv/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Uploaded documents (avoid committing lecture PDFs)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Environment variables
+.env
+
+# Editor files
+.vscode/
