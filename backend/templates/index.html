@@ -1354,11 +1354,8 @@
                                 {{ doc.text[:300] }}...
                             </p>
 
-                            <a class="read-link"
-                               href="{{ url_for('read_document',
-                                                doc_id=doc.id,
-                                                query=query) }}">
-                                Read full document →
+                             <a href="{{ url_for('read_document', doc_id=doc.id, query=query) }}">
+                                Read Full Document →
                             </a>
 
                         </article>

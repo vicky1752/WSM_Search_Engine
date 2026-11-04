@@ -283,17 +283,31 @@ def read_document(doc_id):
     safe_text = html.escape(document["text"])
 
     # Highlight the searched phrase
+        # Highlight all occurrences of the searched phrase
     if query:
         pattern = re.escape(html.escape(query))
+
+        first_match = True
+
+        def highlight_match(match):
+            nonlocal first_match
+
+            if first_match:
+                first_match = False
+                return f'<mark id="first-highlight">{match.group(0)}</mark>'
+
+            return f'<mark>{match.group(0)}</mark>'
+
         highlighted_text = re.sub(
             pattern,
-            lambda match: f"<mark>{match.group(0)}</mark>",
+            highlight_match,
             safe_text,
             flags=re.IGNORECASE
         )
     else:
         highlighted_text = safe_text
 
+        
     return render_template(
         "read_document.html",
         document=document,

@@ -47,7 +47,7 @@
             padding: 2px 4px;
             border-radius: 3px;
         }
-        
+
     </style>
 </head>
 
@@ -65,5 +65,22 @@
         <div class="content">{{ highlighted_text }}</div>
 
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const firstHighlight = document.getElementById("first-highlight");
+
+            if (firstHighlight) {
+                setTimeout(function () {
+                    firstHighlight.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }, 300);
+            }
+
+        });
+    </script>
 </body>
 </html>
