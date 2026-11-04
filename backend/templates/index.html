@@ -8,317 +8,1624 @@
     <title>VKY Search Engine</title>
 
     <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --surface-soft: #f7f8fc;
+            --text: #202124;
+            --muted: #70757a;
+            --border: #e5e7eb;
+            --primary: #3155c6;
+            --primary-hover: #2445aa;
+            --accent-bg: #eef2ff;
+            --success-bg: #eaf7ee;
+            --success: #237a42;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark {
+            --bg: #111318;
+            --surface: #1b1e26;
+            --surface-soft: #222631;
+            --text: #edf0f6;
+            --muted: #a4aab7;
+            --border: #343946;
+            --primary: #8ba6ff;
+            --primary-hover: #a9bbff;
+            --accent-bg: #252f4c;
+            --success-bg: #1d3528;
+            --success: #8bd6a4;
+            --shadow: 0 2px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6fb;
             margin: 0;
-            padding: 40px;
-            color: #222;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.2s, color 0.2s;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 3px 15px #00000012;
+        button, input {
+            font: inherit;
         }
 
-        h1 {
-            color: #243b80;
+        a {
+            color: var(--primary);
+            text-decoration: none;
         }
 
-        .upload-box, .search-box {
-            background: #f0f3ff;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 25px 0;
+        a:hover {
+            text-decoration: underline;
         }
 
-        input[type="text"] {
-            padding: 12px;
-            width: 65%;
-            max-width: 500px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+        .navbar {
+            height: 68px;
+            padding: 0 6%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
         }
 
-        button {
-            background: #243b80;
-            color: white;
-            padding: 11px 20px;
-            border: none;
-            border-radius: 6px;
+        .brand {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.7px;
+            color: var(--text);
+        }
+
+        .brand span {
+            color: var(--primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .theme-button {
+            background: var(--surface-soft);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 9px 13px;
+            border-radius: 20px;
             cursor: pointer;
         }
 
-        button:hover {
-            background: #16275c;
+        .main {
+            width: min(920px, 92%);
+            margin: 0 auto;
+            padding: 65px 0 45px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 46px);
+            letter-spacing: -1.8px;
+            margin: 0 0 12px;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .search-form {
+            max-width: 700px;
+            margin: 28px auto 12px;
+            display: flex;
+            gap: 10px;
+            padding: 7px;
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .search-form:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text);
+            padding: 12px 17px;
+            font-size: 15px;
+        }
+
+        .primary-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 28px;
+            padding: 12px 23px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        body.dark .primary-button {
+            color: #111318;
+        }
+
+        .primary-button:hover {
+            opacity: 0.88;
+        }
+
+        .search-hints {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .section {
+            margin-top: 42px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .section-heading h2 {
+            font-size: 19px;
+            margin: 0;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin: 32px 0;
+        }
+
+        .stat-card {
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 17px;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 25px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 21px;
+            margin: 15px 0;
+        }
+
+        .panel h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        input[type="file"] {
+            max-width: 100%;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 12px;
+            border-radius: 7px;
+            margin-right: 10px;
+            cursor: pointer;
         }
 
         .message {
-            background: #e7f7e9;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 6px;
+            padding: 12px 15px;
+            background: var(--success-bg);
+            color: var(--success);
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 14px;
         }
 
-        .document {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
+        .result-box {
+            padding: 19px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            margin: 13px 0;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .result-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .result-meta {
+            color: var(--muted);
+            font-size: 12px;
+            margin: 8px 0;
         }
 
         .preview {
-            color: #666;
+            color: var(--muted);
             font-size: 14px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .read-link {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .score {
+            display: inline-block;
+            padding: 5px 9px;
+            background: var(--accent-bg);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .document-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .document-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            background: var(--surface);
+            min-width: 0;
+        }
+
+        .document-card strong {
+            display: block;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .document-card p {
+            margin-bottom: 0;
+        }
+
+        .expansion-form {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .text-input {
+            flex: 1;
+            min-width: 180px;
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .text-input:focus {
+            border-color: var(--primary);
+        }
+
+        .term-list {
+            color: var(--primary);
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .details-panel {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .details-panel summary {
+            cursor: pointer;
+            padding: 17px;
+            background: var(--surface-soft);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 400px;
         }
 
         table {
             border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        th {
-            background: #243b80;
-            color: white;
+            width: 100%;
+            font-size: 12px;
         }
 
         th, td {
-            padding: 10px;
             text-align: left;
-            border: 1px solid #ddd;
+            padding: 11px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--surface-soft);
+            position: sticky;
+            top: 0;
+        }
+
+        .empty-state {
+            padding: 25px;
+            text-align: center;
+            color: var(--muted);
+            background: var(--surface-soft);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px 15px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0 4%;
+                height: 60px;
+            }
+
+            .main {
+                padding-top: 42px;
+            }
+
+            .search-form {
+                border-radius: 13px;
+            }
+
+            .search-form input {
+                padding: 11px 8px;
+                font-size: 13px;
+            }
+
+            .search-form .primary-button {
+                padding: 10px 14px;
+                border-radius: 9px;
+                font-size: 13px;
+            }
+
+            .document-list {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 9px;
+            }
+
+            .stat-card {
+                padding: 13px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .nav-right {
+                gap: 8px;
+            }
+
+
+
+        }
+
+
+        
+       
+    /* Academic project information */
+
+    .project-header {
+        width: min(1100px, 92%);
+        margin: 22px auto 0;
+        padding: 22px 25px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        
+
+        display: grid;
+        grid-template-columns: 1fr 1px 1.2fr 2.5fr;
+        align-items: center;
+        gap: 24px;
+        box-shadow: var(--shadow);
+    }
+
+    .project-heading h2 {
+        margin: 0 0 7px;
+        font-size: 20px;
+        color: var(--primary);
+    }
+
+    .project-heading p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .project-divider {
+        height: 65px;
+        background: var(--border);
+    }
+
+    .guide-info,
+    .team-info {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+    }
+
+    .detail-label {
+        font-size: 11px;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .guide-info strong {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .team-members {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .member-card {
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .member-card strong {
+        font-size: 13px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .member-card span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 850px) {
+        .project-header {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .project-divider {
+            display: none;
+        }
+
+        .team-info {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .project-header {
+            grid-template-columns: 1fr;
+            padding: 18px;
+            gap: 18px;
+        }
+
+        .team-info {
+            grid-column: auto;
+        }
+
+        .team-members {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+    
+    /* Document library */
+
+    .document-library {
+        padding: 25px;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        background: var(--surface);
+    }
+
+    .library-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 22px;
+        padding-bottom: 17px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .library-heading h2 {
+        margin: 0 0 7px;
+        font-size: 20px;
+    }
+
+    .library-heading p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    .library-count {
+        background: var(--accent-bg);
+        color: var(--primary);
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .document-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .document-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        padding: 17px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        min-width: 0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .document-card:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow);
+    }
+
+    .document-icon {
+        width: 42px;
+        height: 46px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-bg);
+        border-radius: 8px;
+        font-size: 21px;
+    }
+
+    .document-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .document-info strong {
+        display: block;
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .document-info p {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 8px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .document-info a {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
+    @media (max-width: 650px) {
+        .document-list {
+            grid-template-columns: 1fr;
+        }
+
+        .document-library {
+            padding: 17px;
+        }
+
+        .library-heading {
+            align-items: flex-start;
+        }
+    }
+
+    
+
+        /* Consistent section styling */
+
+        .section {
+            margin-top: 32px;
+        }
+
+        .section-heading h2,
+        .library-heading h2 {
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+
+        .panel {
+            box-shadow: var(--shadow);
         }
 
         .result-box {
-            background: #f8f9fc;
-            padding: 15px;
-            margin: 12px 0;
-            border-radius: 8px;
-            border-left: 4px solid #243b80;
+            box-shadow: none;
+            border-left: 3px solid var(--primary);
         }
 
-        .muted {
-            color: #777;
+        .stat-card {
+            border-radius: 10px;
         }
+
+        .search-hints {
+            line-height: 2;
+        }
+
+        /* Classic visual separation */
+
+        .section > .panel,
+        .section > .details-panel {
+            margin-top: 15px;
+        }
+
+        .footer {
+            margin-top: 45px;
+            line-height: 1.8;
+        }
+
+
+        
+        /* Document collection - vertical list */
+
+        .document-library {
+            margin-top: 65px;
+            padding: 25px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .library-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding-bottom: 18px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .library-heading h2 {
+            margin: 0 0 6px;
+            font-size: 20px;
+        }
+
+        .library-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .library-count {
+            background: var(--accent-bg);
+            color: var(--primary);
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Each document occupies one complete row */
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 17px 10px;
+            border-bottom: 1px solid var(--border);
+            background: transparent;
+            transition: background 0.2s;
+        }
+
+        .document-card:last-child {
+            border-bottom: none;
+        }
+
+        .document-card:hover {
+            background: var(--surface-soft);
+        }
+
+        .document-icon {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-bg);
+            border-radius: 8px;
+            font-size: 20px;
+        }
+
+        .document-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .document-info strong {
+            display: block;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .document-info p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .document-card .read-link {
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .document-library {
+                margin-top: 45px;
+                padding: 16px;
+            }
+
+            .document-card {
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .document-card .read-link {
+                font-size: 11px;
+            }
+
+            .library-heading {
+                align-items: flex-start;
+            }
+        }
+
+
+
+        
+        /* ==================================
+        TYPOGRAPHY AND READABILITY UPGRADE
+        ================================== */
+
+        /* Hero section */
+        .hero h1 {
+            font-size: clamp(36px, 5vw, 48px);
+            line-height: 1.2;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--muted);
+            max-width: 680px;
+            margin: 0 auto 20px;
+        }
+
+        /* Main search bar */
+        .search-form input {
+            font-size: 17px;
+            padding: 15px 20px;
+        }
+
+        .search-form .primary-button {
+            font-size: 15px;
+            padding: 14px 27px;
+        }
+
+        /* Search hints */
+        .search-hints {
+            font-size: 14px;
+            line-height: 1.9;
+            margin-top: 16px;
+        }
+
+        /* Section headings */
+        .section-heading h2,
+        .library-heading h2 {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .section-heading .muted,
+        .library-heading p {
+            font-size: 14px;
+        }
+
+        /* Upload and general panels */
+        .panel {
+            padding: 25px;
+        }
+
+        .panel h3 {
+            font-size: 19px;
+            margin-bottom: 12px;
+        }
+
+        .panel p,
+        .panel .muted {
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        /* File input and upload button */
+        input[type="file"] {
+            font-size: 14px;
+        }
+
+        input[type="file"]::file-selector-button {
+            font-size: 14px;
+            padding: 11px 15px;
+        }
+
+        .upload-form .primary-button {
+            font-size: 14px;
+            padding: 12px 20px;
+        }
+
+        /* Flash messages */
+        .message {
+            font-size: 15px;
+            line-height: 1.7;
+            padding: 15px 18px;
+            border: 1px solid var(--success);
+            border-radius: 9px;
+        }
+
+        /* Search result cards */
+        .result-box {
+            padding: 22px;
+            margin: 16px 0;
+            border-radius: 11px;
+        }
+
+        .result-title {
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        .result-meta {
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        .result-box .preview {
+            font-size: 15px;
+            line-height: 1.8;
+            margin: 14px 0;
+        }
+
+        .score {
+            font-size: 13px;
+            padding: 7px 11px;
+        }
+
+        .read-link {
+            font-size: 14px;
+        }
+
+        /* Query expansion */
+        .expansion-form {
+            margin-top: 20px;
+        }
+
+        .expansion-form .text-input {
+            font-size: 15px;
+            padding: 14px 16px;
+        }
+
+        .expansion-form .primary-button {
+            font-size: 14px;
+            padding: 13px 20px;
+        }
+
+        .term-list {
+            font-size: 15px;
+            line-height: 2;
+        }
+
+        /* Document collection */
+        .document-info strong {
+            font-size: 15px;
+        }
+
+        .document-info p {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .document-card .read-link {
+            font-size: 14px;
+        }
+
+        /* Statistics */
+        .stat-card strong {
+            font-size: 29px;
+        }
+
+        .stat-card span {
+            font-size: 14px;
+        }
+
+        /* General muted text */
+        .muted {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* Mobile readability */
+        @media (max-width: 600px) {
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .search-form input {
+                font-size: 14px;
+            }
+
+            .search-hints {
+                font-size: 12px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+
+            .panel h3 {
+                font-size: 17px;
+            }
+
+            .panel p,
+            .panel .muted {
+                font-size: 14px;
+            }
+
+            .result-box {
+                padding: 17px;
+            }
+
+            .result-box .preview {
+                font-size: 14px;
+            }
+
+            .section-heading h2,
+            .library-heading h2 {
+                font-size: 19px;
+            }
+        }
+
+
+
+        
+        .search-hints {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: var(--muted);
+        }
+
+        .search-hints span {
+            display: inline-block;
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-soft);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+
+        .message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        box-shadow: var(--shadow);
+    }
+
+
+        /* No matching documents and spelling suggestions */
+        .empty-state {
+            padding: 30px 25px;
+            margin-top: 20px;
+            text-align: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .empty-state h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .spelling-message {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 18px;
+        }
+
+        .did-you-mean {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .suggestion-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .suggestion-chip {
+            display: inline-block;
+            padding: 10px 18px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            background: var(--background);
+            color: var(--primary);
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+
     </style>
 </head>
 
 <body>
 
-<div class="container">
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <a href="/" class="brand">VKY <span>Search Engine</span></a>
 
-    <h1>VKY Search Engine</h1>
+        <div class="nav-right">
+            <span class="muted">Web Search Mining</span>
+            <button class="theme-button" id="themeToggle"
+                    type="button" aria-label="Toggle theme">
+                🌙 Dark
+            </button>
+        </div>
+    </nav>
 
-    <h2>Web Search Mining Project</h2>
-
-    <p>
-        Upload documents and search their content
-        using Information Retrieval techniques.
-    </p>
-
-    <!-- DOCUMENT UPLOAD -->
-
-    <div class="upload-box">
-
-        <h3>Upload Documents</h3>
-
-        <form action="/upload" method="POST"
-              enctype="multipart/form-data">
-
-            <input type="file" name="file"
-                   accept=".pdf,.docx,.txt" required>
-
-            <br><br>
-
-            <button type="submit">Upload Document</button>
-
-        </form>
-
-        <p>Supported formats: PDF, DOCX, TXT</p>
-
-    </div>
-
-    <!-- FLASH MESSAGES -->
-
-    {% with messages = get_flashed_messages() %}
-        {% for message in messages %}
-            <div class="message">{{ message }}</div>
-        {% endfor %}
-    {% endwith %}
-
-
-    <!-- SEARCH DOCUMENTS -->
-
-    <div class="search-box">
-
-        <h2>Search Documents</h2>
-
-        <p>
-            Search using ranked retrieval, Boolean operators
-            or exact phrase matching.
-        </p>
-
-        <form action="/search" method="GET">
-
-            <input
-                type="text"
-                name="query"
-                placeholder='bhungi OR "eleven stories"'
-                value="{{ query|default('') }}"
-                required
-            >
-
-            <button type="submit">Search</button>
-
-        </form>
-
-        <p class="muted">
-            Ranked: premchand |
-            Phrase: "eleven stories" |
-            Boolean: information AND retrieval
-        </p>
-
-    </div>
-
-   <!-- search expand -->
-
-    <hr>
-
-    <h3>Query Expansion Demonstration</h3>
-
-    <form action="/expand" method="GET">
-        <input type="text" name="query"
-            placeholder="Enter a query" required>
-        <button type="submit">Expand Query</button>
-    </form>
-
-    {% if expanded %}
-        <p><strong>Expanded terms:</strong></p>
-        <p>{{ expanded|join(", ") }}</p>
-    {% endif %}
 
 
     
-    <!-- SEARCH RESULTS -->
+    <!-- PROJECT INFORMATION HEADER -->
 
-    {% if query %}
+    <section class="project-header">
 
-        <h2>{{ search_type|default('Search') }} Results</h2>
+        <div class="project-heading">
+            <h2>VKY Search Engine</h2>
+            <p>Web Search Mining Project</p>
+        </div>
 
-        <p>Search query: <strong>{{ query }}</strong></p>
+        <div class="project-divider"></div>
 
-        {% if results %}
+        <div class="guide-info">
+            <span class="detail-label">PROJECT GUIDE</span>
+            <strong>Prof. Rakesh Balbantaray</strong>
+        </div>
 
-            <p>Documents found: {{ results|length }}</p>
+        <div class="team-info">
+            <span class="detail-label">PROJECT TEAM</span>
 
-            {% for doc in results %}
+            <div class="team-members">
 
-                <div class="result-box">
+                <div class="member-card">
+                    <strong>Vicky Kumar</strong>
+                    <span>B124153</span>
+                </div>
 
-                    <strong>{{ doc.name }}</strong>
+                <div class="member-card">
+                    <strong>Subham Jyoti Sahu</strong>
+                    <span>B124136</span>
+                </div>
 
-                    {% if doc.score is defined %}
+                <div class="member-card">
+                    <strong>Om Saikrushna Behera</strong>
+                    <span>B124081</span>
+                </div>
 
-                        <p>
-                            Relevance Score:
-                            <strong>
-                                {{ "%.4f"|format(doc.score) }}
-                            </strong>
+            </div>
+        </div>
+
+    </section>
+
+
+
+    <main class="main">
+
+        <!-- HERO AND SEARCH -->
+        <section class="hero">
+            <h1>Search your <span>documents.</span></h1>
+
+            <p>
+                Discover information across your document collection
+                using Information Retrieval techniques.
+            </p>
+
+            <form action="/search" method="GET" class="search-form">
+                <input
+                    type="text"
+                    name="query"
+                    placeholder="Search documents..."
+                    value="{{ query|default('') }}"
+                    aria-label="Search documents"
+                    required
+                >
+
+                <button type="submit" class="primary-button">
+                    Search
+                </button>
+            </form>
+
+            <div class="search-hints">
+                <strong>Try searching:</strong>
+
+                <span>premchand</span>
+                <span>"eleven stories"</span>
+                <span>prem*</span>
+            </div>
+        </section>
+
+
+        
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- STATISTICS -->
+        <section class="stats">
+            <div class="stat-card">
+                <strong>{{ documents|length }}</strong>
+                <span>Indexed documents</span>
+            </div>
+
+            <div class="stat-card">
+                <strong>{{ index|length }}</strong>
+                <span>Unique indexed terms</span>
+            </div>
+        </section>
+
+        <!-- SEARCH RESULTS -->
+        {% if query %}
+            <section class="section" id="results">
+
+                <div class="section-heading">
+                    <h2>Search results</h2>
+                    <span class="muted">
+                        {{ results|length }} found
+                    </span>
+                </div>
+
+                <p class="muted">
+                    {{ search_type|default('Search') }} for:
+                    <strong>{{ query }}</strong>
+                </p>
+
+                {% if results %}
+
+                    {% for doc in results %}
+                        <article class="result-box">
+
+                            <div class="result-title">
+                                {{ doc.name }}
+                            </div>
+
+                            <div class="result-meta">
+                                Document ID: {{ doc.id }}
+                            </div>
+
+                            {% if doc.score is defined %}
+                                <span class="score">
+                                    Relevance:
+                                    {{ "%.4f"|format(doc.score) }}
+                                </span>
+                            {% endif %}
+
+                            <p class="preview">
+                                {{ doc.text[:300] }}...
+                            </p>
+
+                            <a class="read-link"
+                               href="{{ url_for('read_document',
+                                                doc_id=doc.id,
+                                                query=query) }}">
+                                Read full document →
+                            </a>
+
+                        </article>
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+        <h3>No matching documents found</h3>
+
+        <p class="spelling-message">
+            Try another keyword or check the spelling.
+        </p>
+
+        {% if suggestions %}
+            <p class="did-you-mean">Did you mean:</p>
+
+            <div class="suggestion-list">
+                        {% for suggestion in suggestions %}
+                            <a href="{{ url_for('search', query=suggestion) }}"
+                            class="suggestion-chip">
+                                {{ suggestion }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+
+
+                {% endif %}
+            </section>
+        {% endif %}
+
+
+        <!-- UPLOAD DOCUMENTS -->
+        <section class="section">
+            <div class="section-heading">
+                <h2>Add documents</h2>
+            </div>
+
+            <div class="panel">
+                <h3>Upload a document</h3>
+
+                <p class="muted">
+                    Add your own documents to the searchable collection.
+                    Supported formats: PDF, DOCX and TXT.
+                </p>
+
+                <form action="/upload" method="POST"
+                      enctype="multipart/form-data"
+                      class="upload-form">
+
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".pdf,.docx,.txt"
+                        required
+                    >
+
+                    <button type="submit" class="primary-button">
+                        Upload document
+                    </button>
+                </form>
+            </div>
+        </section>
+
+
+
+        <!-- QUERY EXPANSION -->
+        <section class="section">
+            <div class="panel">
+                <h3>Query Expansion</h3>
+
+                <p class="muted">
+                    Expand your search using related terms and synonyms.
+                </p>
+
+                <form action="/expand" method="GET"
+                      class="expansion-form">
+
+                    <input
+                        class="text-input"
+                        type="text"
+                        name="query"
+                        placeholder="Enter a query to expand..."
+                        required
+                    >
+
+                    <button type="submit" class="primary-button">
+                        Expand query
+                    </button>
+                </form>
+
+                {% if expanded %}
+                    <div style="margin-top: 18px;">
+                        <p class="muted">Expanded search terms:</p>
+                        <p class="term-list">
+                            {{ expanded|join(", ") }}
                         </p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
 
-                    {% endif %}
+        
 
-                    <p class="preview">
-                        {{ doc.text[:300] }}...
-                    </p>
+        
+        <!-- DOCUMENT COLLECTION -->
+
+        <section class="section document-library">
+
+            <div class="library-heading">
+                <div>
+                    <h2>Document Collection</h2>
+                    <p>Browse and read all indexed documents.</p>
+                </div>
+
+                <span class="library-count">
+                    {{ documents|length }} Documents
+                </span>
+            </div>
+
+            {% if documents %}
+
+                <div class="document-list">
+
+                    {% for doc in documents %}
+
+                        <article class="document-card">
+
+                            <div class="document-icon">
+                                📄
+                            </div>
+
+                            <div class="document-info">
+
+                                <strong>{{ doc.name }}</strong>
+
+                                <p>
+                                    {{ doc.text[:140] }}...
+                                </p>
+
+                            </div>
+
+                            <a class="read-link"
+                            href="{{ url_for('read_document',
+                                                doc_id=doc.id) }}">
+                                Read →
+                            </a>
+
+                        </article>
+
+                    {% endfor %}
 
                 </div>
 
-            {% endfor %}
+            {% else %}
 
-        {% else %}
+                <div class="empty-state">
+                    No documents available yet.
+                </div>
 
-            <p>No matching documents found.</p>
-
-            {% if suggestions %}
-                <p>Did you mean:</p>
-
-                {% for suggestion in suggestions %}
-                    <a href="/search?query={{ suggestion }}">
-                        {{ suggestion }}
-                    </a>
-                {% endfor %}
             {% endif %}
 
-        {% endif %}
-
-    {% endif %}
+        </section>
 
 
 
+        <!-- INVERTED INDEX EXPLORER -->
+        <section class="section">
+            <details class="details-panel">
+                <summary>
+                    Explore Inverted Index ({{ index|length }} terms)
+                </summary>
 
-    <!-- UPLOADED DOCUMENTS -->
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Term</th>
+                                <th>Document ID</th>
+                                <th>Positions</th>
+                            </tr>
+                        </thead>
 
-    <hr>
+                        <tbody>
+                            {% for term, postings in index.items() %}
+                                {% for doc_id, positions in postings.items() %}
+                                    <tr>
+                                        <td>{{ term }}</td>
+                                        <td>D{{ doc_id }}</td>
+                                        <td>{{ positions }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </section>
 
-    <h2>Uploaded Documents ({{ documents|length }})</h2>
+    </main>
 
-    {% for doc in documents %}
+    <!-- FOOTER -->
+    <footer class="footer">
+        VKY Search Engine · Web Search Mining Project
+        <br>
+        Built with Python, Flask and Information Retrieval Algorithms
+    </footer>
 
-        <div class="document">
+    <!-- THEME TOGGLE JAVASCRIPT -->
+    <script>
+        const themeToggle = document.getElementById("themeToggle");
+        const body = document.body;
 
-            <strong>{{ doc.name }}</strong>
+        // Load saved theme or use light mode by default
+        const savedTheme = localStorage.getItem("vky-theme");
 
-            <p class="preview">
-                {{ doc.text[:250] }}...
-            </p>
+        if (savedTheme === "dark") {
+            body.classList.add("dark");
+        }
 
-        </div>
+        function updateThemeButton() {
+            if (body.classList.contains("dark")) {
+                themeToggle.textContent = "☀️ Light";
+            } else {
+                themeToggle.textContent = "🌙 Dark";
+            }
+        }
 
-    {% else %}
+        updateThemeButton();
 
-        <p>No documents uploaded yet.</p>
+        themeToggle.addEventListener("click", function () {
+            body.classList.toggle("dark");
 
-    {% endfor %}
+            const currentTheme = body.classList.contains("dark")
+                ? "dark"
+                : "light";
+
+            localStorage.setItem("vky-theme", currentTheme);
+
+            updateThemeButton();
+        });
+    </script>
 
 
-    <!-- INVERTED INDEX -->
 
-    <hr>
 
-    <h2>Inverted Index Explorer</h2>
+    <!-- Automatically scroll to the highlighted word -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-    <p>
-        Dictionary terms and their corresponding positional postings.
-    </p>
+        const firstHighlight = document.querySelector(".content mark");
 
-    <table width="100%">
+        if (firstHighlight) {
+            setTimeout(function () {
+                firstHighlight.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }, 300);
+        }
 
-        <tr>
-            <th>Term</th>
-            <th>Document ID</th>
-            <th>Positions</th>
-        </tr>
+    });
+    </script>
 
-        {% for term, postings in index.items() %}
-
-            {% for doc_id, positions in postings.items() %}
-
-                <tr>
-                    <td>{{ term }}</td>
-                    <td>D{{ doc_id }}</td>
-                    <td>{{ positions }}</td>
-                </tr>
-
-            {% endfor %}
-
-        {% endfor %}
-
-    </table>
-
-</div>
 
 </body>
 </html>

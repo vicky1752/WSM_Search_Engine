@@ -14,6 +14,10 @@ from algorithms.tolerant_retrieval import (
 )
 from algorithms.query_expansion import expand_query
 
+import re
+import html
+from markupsafe import Markup
+
 
 app = Flask(__name__)
 app.secret_key = "mini-search-engine-secret"
@@ -257,6 +261,46 @@ def upload():
         flash(f"Could not process document: {error}")
 
     return redirect(url_for("home"))
+
+
+# read the searched document
+
+# Read document with highlighted search terms
+@app.route("/read/<int:doc_id>")
+def read_document(doc_id):
+
+    document = next(
+        (doc for doc in documents if doc["id"] == doc_id),
+        None
+    )
+
+    if document is None:
+        return "Document not found", 404
+
+    query = request.args.get("query", "").strip()
+
+    # Escape document text to prevent HTML injection
+    safe_text = html.escape(document["text"])
+
+    # Highlight the searched phrase
+    if query:
+        pattern = re.escape(html.escape(query))
+        highlighted_text = re.sub(
+            pattern,
+            lambda match: f"<mark>{match.group(0)}</mark>",
+            safe_text,
+            flags=re.IGNORECASE
+        )
+    else:
+        highlighted_text = safe_text
+
+    return render_template(
+        "read_document.html",
+        document=document,
+        highlighted_text=Markup(highlighted_text),
+        query=query
+    )
+
 
 
 # Load documents when the application starts.

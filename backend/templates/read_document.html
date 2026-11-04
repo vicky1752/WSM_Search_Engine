@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ document.name }} | VKY Search Engine</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            color: #263b80;
+            overflow-wrap: anywhere;
+        }
+
+        .content {
+            font-size: 17px;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #3155c6;
+        }
+
+        mark {
+            background-color: #fff09a;
+            color: #222;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <a class="back" href="{{ url_for('home') }}">
+            ← Back to Search Engine
+        </a>
+
+        <h1>{{ document.name }}</h1>
+
+        <hr>
+
+        <div class="content">{{ highlighted_text }}</div>
+
+    </div>
+</body>
+</html>
