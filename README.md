@@ -152,13 +152,12 @@ processing, indexing, query processing, and relevance-based ranking.
 -   **Programme:** Bachelor of Technology (B.Tech)
 -   **Academic Session:** 2024--2028
 
-### Project Team
+
 
   Student Name           Roll Number
   ---------------------- -------------
   Vicky Kumar            B124153
-  Subham Jyoti Sahu      B124136
-  Om Saikrushna Behera   B124081
+  
 
 ## Notes
 
