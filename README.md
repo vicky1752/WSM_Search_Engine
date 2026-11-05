@@ -154,9 +154,13 @@ processing, indexing, query processing, and relevance-based ranking.
 
 
 
-  **Student Name**      ( **ID** )
-  ---------------------- -------------
-  Vicky Kumar              (**B124153** )
+  ## Project Team
+
+| **Student Name** | **Student ID** |
+|---|---|
+| Vicky Kumar | B124153 |
+| Subham Jyoti Sahu | B124136 |
+| Om Saikrushna Behera | B124081 |
   
   
 
